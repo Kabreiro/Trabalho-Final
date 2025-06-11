@@ -114,7 +114,7 @@ app.post('/cadastro-equipe', auth, (req, res) => {
 
 app.get('/cadastro-jogador', auth, (req, res) => {
   if (equipes.length === 0) {
-    return res.send('<p>Cadastre pelo menos uma equipe antes de adicionar jogadores.</p><a href="/cadastro-equipe">Cadastrar equipe</a>');
+    return res.send('<link rel="stylesheet" href="/public/style.css"><div class="container>"<p>Cadastre pelo menos uma equipe antes de adicionar jogadores.</p><a href="/cadastro-equipe">Cadastrar equipe</a></div>');
   }
   let options = equipes.map(eq => `<option value="${eq.nomeEquipe}">${eq.nomeEquipe}</option>`).join('');
   res.send(`
