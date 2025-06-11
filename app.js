@@ -34,7 +34,9 @@ app.post('/login', (req, res) => {
   const { usuario, senha } = req.body;
   if (usuario === 'admin' && senha === '123') {
     req.session.logado = true;
+
     const dataFormatada = new Date().toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -42,6 +44,7 @@ app.post('/login', (req, res) => {
       minute: '2-digit',
       second: '2-digit'
     });
+
     res.cookie('ultimoAcesso', dataFormatada);
     return res.redirect('/menu');
   }
