@@ -1,0 +1,13 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #f0f0f0;
+}
+
+form input, form select {
+  margin-bottom: 10px;
+}
+
+h1 {
+  color: #333;
+}
