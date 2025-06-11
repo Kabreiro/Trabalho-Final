@@ -6,7 +6,7 @@ const path = require('path');
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
 app.use(session({
@@ -16,7 +16,6 @@ app.use(session({
   cookie: { maxAge: 1800000 } // 30 minutos
 }));
 
-// "Banco de dados" em memória
 let equipes = [];
 let jogadores = [];
 
@@ -51,17 +50,27 @@ app.get('/logout', (req, res) => {
 app.get('/menu', auth, (req, res) => {
   const ultimoAcesso = req.cookies.ultimoAcesso || 'Primeiro acesso';
   res.send(`
-    <h1>Menu do Sistema</h1>
-    <p>Último acesso: ${ultimoAcesso}</p>
-    <ul>
-      <li><a href="/cadastro-equipe">Cadastrar Equipe</a></li>
-      <li><a href="/cadastro-jogador">Cadastrar Jogador</a></li>
-    </ul>
-    <a href="/logout">Sair</a>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <link rel="stylesheet" href="/public/style.css">
+      <title>Menu</title>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Menu do Sistema</h1>
+        <p>Último acesso: ${ultimoAcesso}</p>
+        <ul>
+          <li><a href="/cadastro-equipe">Cadastrar Equipe</a></li>
+          <li><a href="/cadastro-jogador">Cadastrar Jogador</a></li>
+        </ul>
+        <a href="/logout">Sair</a>
+      </div>
+    </body>
+    </html>
   `);
 });
 
-// Equipes
 app.get('/cadastro-equipe', auth, (req, res) => {
   res.sendFile(path.join(__dirname, 'pages', 'cadastro-equipe.html'));
 });
@@ -72,40 +81,60 @@ app.post('/cadastro-equipe', auth, (req, res) => {
     return res.send('<script>alert("Preencha todos os campos"); window.history.back();</script>');
   }
   equipes.push({ nomeEquipe, tecnico, telefone });
-  let lista = '<h2>Equipes Cadastradas</h2><ul>';
+
+  let lista = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <link rel="stylesheet" href="/public/style.css">
+      <title>Equipes</title>
+    </head>
+    <body>
+    <div class="container">
+      <h2>Equipes Cadastradas</h2><ul>`;
   for (const e of equipes) {
     lista += `<li>${e.nomeEquipe} - Técnico: ${e.tecnico} - Tel: ${e.telefone}</li>`;
   }
-  lista += '</ul><a href="/cadastro-equipe">Cadastrar outra</a> | <a href="/menu">Menu</a>';
+  lista += `</ul>
+      <a href="/cadastro-equipe">Cadastrar outra</a> | <a href="/menu">Menu</a>
+    </div></body></html>`;
   res.send(lista);
 });
 
-// Jogadores
 app.get('/cadastro-jogador', auth, (req, res) => {
   if (equipes.length === 0) {
     return res.send('<p>Cadastre pelo menos uma equipe antes de adicionar jogadores.</p><a href="/cadastro-equipe">Cadastrar equipe</a>');
   }
   let options = equipes.map(eq => `<option value="${eq.nomeEquipe}">${eq.nomeEquipe}</option>`).join('');
   res.send(`
-    <h2>Cadastro de Jogador</h2>
-    <form method="POST" action="/cadastro-jogador">
-      Nome: <input name="nome" required><br>
-      Número: <input name="numero" required><br>
-      Nascimento: <input type="date" name="nascimento" required><br>
-      Altura (cm): <input name="altura" required><br>
-      Gênero:
-      <select name="genero" required>
-        <option>Masculino</option>
-        <option>Feminino</option>
-      </select><br>
-      Posição: <input name="posicao" required><br>
-      Equipe:
-      <select name="equipe" required>
-        ${options}
-      </select><br>
-      <button type="submit">Cadastrar</button>
-    </form>
-    <a href="/menu">Menu</a>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <link rel="stylesheet" href="/public/style.css">
+      <title>Cadastro de Jogador</title>
+    </head>
+    <body>
+    <div class="container">
+      <h2>Cadastro de Jogador</h2>
+      <form method="POST" action="/cadastro-jogador">
+        Nome: <input name="nome" required><br>
+        Número: <input name="numero" required><br>
+        Nascimento: <input type="date" name="nascimento" required><br>
+        Altura (cm): <input name="altura" required><br>
+        Gênero:
+        <select name="genero" required>
+          <option>Masculino</option>
+          <option>Feminino</option>
+        </select><br>
+        Posição: <input name="posicao" required><br>
+        Equipe:
+        <select name="equipe" required>
+          ${options}
+        </select><br>
+        <button type="submit">Cadastrar</button>
+      </form>
+      <a href="/menu">Menu</a>
+    </div></body></html>
   `);
 });
 
@@ -128,7 +157,16 @@ app.post('/cadastro-jogador', auth, (req, res) => {
     agrupados[j.equipe].push(j);
   });
 
-  let html = '<h1>Jogadores por Equipe</h1>';
+  let html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <link rel="stylesheet" href="/public/style.css">
+      <title>Lista de Jogadores</title>
+    </head>
+    <body>
+    <div class="container">
+      <h1>Jogadores por Equipe</h1>`;
   for (let equipe in agrupados) {
     html += `<h2>${equipe}</h2><ul>`;
     agrupados[equipe].forEach(j => {
@@ -137,7 +175,7 @@ app.post('/cadastro-jogador', auth, (req, res) => {
     html += '</ul>';
   }
 
-  html += '<a href="/cadastro-jogador">Cadastrar outro</a> | <a href="/menu">Menu</a>';
+  html += '<a href="/cadastro-jogador">Cadastrar outro</a> | <a href="/menu">Menu</a></div></body></html>';
   res.send(html);
 });
 
