@@ -34,7 +34,15 @@ app.post('/login', (req, res) => {
   const { usuario, senha } = req.body;
   if (usuario === 'admin' && senha === '123') {
     req.session.logado = true;
-    res.cookie('ultimoAcesso', new Date().toLocaleString());
+    const dataFormatada = new Date().toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    res.cookie('ultimoAcesso', dataFormatada);
     return res.redirect('/menu');
   }
   res.send('<script>alert("Login inválido!");window.location="/login";</script>');
@@ -170,7 +178,8 @@ app.post('/cadastro-jogador', auth, (req, res) => {
   for (let equipe in agrupados) {
     html += `<h2>${equipe}</h2><ul>`;
     agrupados[equipe].forEach(j => {
-      html += `<li>${j.nome} - nº ${j.numero} - ${j.posicao}</li>`;
+      const nascBR = new Date(j.nascimento).toLocaleDateString('pt-BR');
+      html += `<li>${j.nome} - nº ${j.numero} - ${j.posicao} - Nasc: ${nascBR} - Altura: ${j.altura} cm</li>`;
     });
     html += '</ul>';
   }
